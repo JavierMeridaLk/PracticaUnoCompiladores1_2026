@@ -20,6 +20,7 @@ ESPACIOS = [ \n\r\t]
 HEX_DIGIT = [0-9A-Fa-f]
 COLOR_HEX = H{HEX_DIGIT}{6}
 COMENTARIO = \#[^\r\n]*
+TEXTO = \"[^\\"\r\n]*\"
 
 //*****Constructor*****
 
@@ -129,6 +130,7 @@ string = new StringBuffer();
 "="                             { return getToken(sym.ASIGNACION); }
 ","                             { return getToken(sym.COMA); }
 {IDENTIFICADOR}                 { return getToken(sym.IDENTIFICADOR); }
+{TEXTO}                         { return getToken(sym.TEXTO); }
 {ESPACIOS}                      { /* Ignorar espacios en blanco */ }
 //*****Tokens no aceptados*****
 .                               { error("lexema: <" + yytext() + ">"); }

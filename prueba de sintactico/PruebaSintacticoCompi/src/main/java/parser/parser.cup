@@ -2,3 +2,72 @@ package parser;
 import java_cup.runtime.*;
 import java.util.*;
 
+/********** Codigo cup **********/
+
+parser code {:
+
+    AnalizadorLexico lex;
+    private List<String> syntaxErrors;
+
+    /*** Conexion de Parser y Lexer ***
+
+    public parser(AnalizadorLexico lex){
+        super(lex);
+        syntaxErrors = new ArrayList<>();
+    }
+
+    /*** Getters ***/
+
+    public AnalizadorLexico getLexer(){
+        return this.lex;
+    }
+
+    public List<String> getSyntaxErrors(){
+        return this.syntaxErros;
+    }
+
+    /*** Manejo de los Errores Sintacticos ***/
+    
+    public void syntax_error(Symbol cur_token) {
+
+        if(cur_token != null){
+
+            String lexema = (cur_token.value != null)
+                    ? cur_token.value.toString()
+                    : sym.terminalNames[cur_token.sym];
+
+            String error = "Error sintactico en linea "
+                    + cur_token.left +
+                    ", columna " +
+                    cur_token.right +
+                    ". Token inesperado: " +
+                    lexema;
+
+            syntaxErrors.add(error);
+        }
+
+    }
+
+:}
+
+/********** Reglas sintacticas **********/
+
+/*** Terminales ***/
+
+terminal String     VAR,INICIO,FIN, SI, ENTONCES, MIENTRAS, HACER, MOSTRAR, LEER,
+                    DEFAULT, COLOR_TEXTO_SI, COLOR_SI, FIGURA_SI, LETRA_SI, LETRA_SIZE_SI,
+                    COLOR_TEXTO_MIENTRAS, COLOR_MIENTRAS, FIGURA_MIENTRAS, LETRA_MIENTRAS,
+                    LETRA_SIZE_MIENTRAS, COLOR_TEXTO_BLOQUE, COLOR_BLOQUE, FIGURA_BLOQUE,
+                    LETRA_BLOQUE, LETRA_SIZE_BLOQUE,
+                    ELIPSE, CIRCULO, PARALELOGRAMO, RECTANGULO, ROMBO, RECTANGULO_REDONDEADO,
+                    ARIAL, TIME_NEW_ROMAN, COMIC_SANS, VERDANA,
+                    COLOR_HEX,
+                    IGUALDAD, DIFERENCIA, MAYOR_IGUAL, MENOR_IGUAL, MAYOR, MENOR,
+                    AND, OR, NOT,
+                    SUMA, RESTA, MULTIPLICACION, DIVISION, PARENTESIS_IZQUIERDO,PARENTESIS_DERECHO,
+                    SEPARADOR, COMENTARIO, NUMERO, ASIGNACION, COMA, IDENTIFICADOR, TEXTO
+                    ;
+
+/*** No terminales ***/
+
+non terminal
