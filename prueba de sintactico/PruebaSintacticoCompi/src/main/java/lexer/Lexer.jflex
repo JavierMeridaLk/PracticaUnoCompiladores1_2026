@@ -1,4 +1,4 @@
-
+package lexer;
 import java_cup.runtime.*;
 import java.util.*;
 
