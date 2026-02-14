@@ -1,0 +1,152 @@
+# =====================================
+# PRUEBA COMPLETA DEL ANALIZADOR LEXICO
+# =====================================
+
+INICIO
+
+# ===== VARIABLES =====
+VAR a = 10
+VAR b = 20
+VAR c = 30.5
+VAR resultado = 0
+VAR contador = 1
+VAR valor123 = 999
+VAR variableX = 45.25
+
+# ===== OPERADORES ARITMETICOS =====
+resultado = a + b
+resultado = resultado - 5
+resultado = resultado * 2
+resultado = resultado / 3
+
+# ===== OPERADORES RELACIONALES =====
+SI (a == b) ENTONCES
+    MOSTRAR resultado
+FIN
+
+SI (a != b) ENTONCES
+    MOSTRAR resultado
+FIN
+
+SI (a >= b) ENTONCES
+    MOSTRAR resultado
+FIN
+
+SI (a <= b) ENTONCES
+    MOSTRAR resultado
+FIN
+
+SI (a > b) ENTONCES
+    MOSTRAR resultado
+FIN
+
+SI (a < b) ENTONCES
+    MOSTRAR resultado
+FIN
+
+# ===== OPERADORES LOGICOS =====
+SI (a < b && b > c) ENTONCES
+    MOSTRAR resultado
+FIN
+
+SI (a < b || b > c) ENTONCES
+    MOSTRAR resultado
+FIN
+
+SI (!(a == b)) ENTONCES
+    MOSTRAR resultado
+FIN
+
+# ===== CICLO =====
+MIENTRAS (contador < 5) HACER
+    contador = contador + 1
+    MOSTRAR contador
+FIN
+
+# ===== IDENTIFICADORES =====
+VAR prueba1 = 100
+VAR pruebaABC = 200
+VAR prueba123ABC = 300
+
+# ===== NUMEROS =====
+VAR entero = 123456
+VAR decimal = 123.456
+
+# ===== COLORES HEX VALIDOS =====
+VAR color1 = HFFA012
+VAR color2 = H000000
+VAR color3 = HFFFFFF
+VAR color4 = H123ABC
+
+MOSTRAR resultado
+
+FIN
+
+%%%%
+
+# =====================================
+# CONFIGURACION COMPLETA
+# =====================================
+
+%DEFAULT=1
+
+%COLOR_TEXTO_SI=HFF0000
+%COLOR_SI=H00FF00
+%FIGURA_SI=ROMBO
+%LETRA_SI=ARIAL
+%LETRA_SIZE_SI=12
+
+%COLOR_TEXTO_MIENTRAS=H0000FF
+%COLOR_MIENTRAS=HFFFF00
+%FIGURA_MIENTRAS=CIRCULO
+%LETRA_MIENTRAS=VERDANA
+%LETRA_SIZE_MIENTRAS=14
+
+%COLOR_TEXTO_BLOQUE=HABCDEF
+%COLOR_BLOQUE=H123456
+%FIGURA_BLOQUE=RECTANGULO
+%LETRA_BLOQUE=COMIC_SANS
+%LETRA_SIZE_BLOQUE=16
+
+# ===== TODAS LAS FIGURAS =====
+
+%FIGURA_SI=ELIPSE
+%FIGURA_SI=CIRCULO
+%FIGURA_SI=PARALELOGRAMO
+%FIGURA_SI=RECTANGULO
+%FIGURA_SI=ROMBO
+%FIGURA_SI=RECTANGULO_REDONDEADO
+
+# ===== TODOS LOS TIPOS DE LETRA =====
+
+%LETRA_SI=ARIAL
+%LETRA_SI=TIME_NEW_ROMAN
+%LETRA_SI=COMIC_SANS
+%LETRA_SI=VERDANA
+
+# =====================================
+# ERRORES LEXICOS INTENCIONALES
+# =====================================
+
+@
+$
+&
+?
+¿
+¡
+
+VAR @error = 10
+VAR error$ = 20
+
+VAR malHex = H12G456
+
+VAR numeroMalo = 12.34.56
+
+%
+%%
+%%%
+
+# =====================================
+# FIN DE PRUEBA
+# =====================================
+
