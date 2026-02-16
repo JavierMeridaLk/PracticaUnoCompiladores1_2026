@@ -20,7 +20,7 @@ ESPACIOS = [ \n\r\t]
 HEX_DIGIT = [0-9A-Fa-f]
 COLOR_HEX = H{HEX_DIGIT}{6}
 COMENTARIO = \#[^\r\n]*
-TEXTO = \"[^\\"\r\n]*\"
+TEXTO = \"[^\\"\r]*\"
 
 //*****Constructor*****
 
@@ -127,6 +127,7 @@ string = new StringBuffer();
 //*****Números*****
 {DIGITO}+(\.{DIGITO}+)?         { return getToken(sym.NUMERO); }
 //*****Extras*****
+"|"                             { return getToken(sym.PIPE); }
 "="                             { return getToken(sym.ASIGNACION); }
 ","                             { return getToken(sym.COMA); }
 {IDENTIFICADOR}                 { return getToken(sym.IDENTIFICADOR); }

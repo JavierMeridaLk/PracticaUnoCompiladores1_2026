@@ -9,7 +9,7 @@ parser code {:
     AnalizadorLexico lex;
     private List<String> syntaxErrors;
 
-    /*** Conexion de Parser y Lexer ***
+    /*** Conexion de Parser y Lexer ***/
 
     public parser(AnalizadorLexico lex){
         super(lex);
@@ -48,6 +48,11 @@ parser code {:
 
     }
 
+    public void unrecovered_syntax_error(Symbol cur_tokne){
+        syntaxErros.add("Error que no se puede recuperar"); 
+
+    }
+
 :}
 
 /********** Reglas sintacticas **********/
@@ -65,9 +70,89 @@ terminal String     VAR,INICIO,FIN, SI, ENTONCES, MIENTRAS, HACER, MOSTRAR, LEER
                     IGUALDAD, DIFERENCIA, MAYOR_IGUAL, MENOR_IGUAL, MAYOR, MENOR,
                     AND, OR, NOT,
                     SUMA, RESTA, MULTIPLICACION, DIVISION, PARENTESIS_IZQUIERDO,PARENTESIS_DERECHO,
-                    SEPARADOR, COMENTARIO, NUMERO, ASIGNACION, COMA, IDENTIFICADOR, TEXTO
+                    SEPARADOR, COMENTARIO, NUMERO, ASIGNACION, COMA, IDENTIFICADOR, TEXTO, PIPE
                     ;
 
-/*** No terminales ***/
+/*** No terminales -- Reglas definidas para la estructura sintactica ***/
 
 non terminal
+                    ;
+
+/*** Gramatica -- Reglas de validación ***/
+
+start with linea;
+
+linea ::=               INICIO seudocodigo
+                        ;
+valor ::=               IDENTIFICADOR
+                        | NUMERO
+                        ;
+texto ::=               TEXTO
+                        |IDENTIFICADOR
+                        ;
+operador_relacional ::= IGUALDAD
+                        | DIFERENCIA
+                        | MAYOR_IGUAL
+                        | MENOR_IGUAL
+                        | MAYOR
+                        | MENOR
+                        ;
+operador_logico ::=     AND
+                        |OR
+                        |NOT
+                        ;
+condicion ::=           PARENTESIS_IZQUIERDO valor operador_relacional valor PARENTESIS_DERECHO
+                        | PARENTESIS_IZQUIERDO valor operador_relacional valor operador_logico valor operador_relacional valor PARENTESIS_DERECHO
+                        ;
+indice ::=                 NUMERO
+                        ;
+figura ::=              ELIPSE
+                        | CIRCULO
+                        | PARALELOGRAMO
+                        | RECTANGULO
+                        | ROMBO
+                        | RECTANGULO_REDONDEADO
+                        ;
+color :: =              COLOR_HEX
+                        | NUMERO COMA NUMERO COMA NUMERO
+                        ;
+tipo_letras ::=         ARIAL
+                        | TIME_NEW_ROMAN
+                        | COMIC_SANS
+                        | VERDANA
+                        ;
+signos_aritmeticos ::=  SUMA
+                        | RESTA
+                        | MULTIPLICACION
+                        | DIVISION
+                        | PARENTESIS_IZQUIERDO
+                        | PARENTESIS_DERECHO
+                        ;
+seudocodigo ::=         VAR IDENTIFICADOR ASIGNACION valor
+                        | SI condicion ENTONCES seudocodigo
+                        | MIENTRAS condicion HACER seudocodigo
+                        | MOSTRAR texto
+                        | LEER IDENTIFICADOR
+                        | COMENTARIO
+                        | FIN configuracion
+                        ;
+configuracion ::=       SEPARADOR configuracion
+                        | COMENTARIO configuracion
+                        | DEFAULT ASIGNACION indice
+                        | COLOR_TEXTO_SI ASIGNACION color PIPE indice
+                        | COLOR_SI ASIGNACION color PIPE indice
+                        | FIGURA_SI ASIGNACION figura PIPE indice
+                        | LETRA_SI ASIGNACION letra PIPE indice
+                        | LETRA_SIZE_SI ASIGNACION NUMERO PIPE indice
+                        | COLOR_TEXTO_MIENTRAS ASIGNACION color PIPE indice
+                        | COLOR_MIENTRAS ASIGNACION color PIPE indice
+                        | FIGURA_MIENTRAS ASIGNACION figura PIPE indice
+                        | LETRA_MIENTRAS ASIGNACION letra PIPE indice
+                        | LETRA_SIZE_MIENTRAS ASIGNACION NUMERO PIPE indice
+                        | COLOR_TEXTO_BLOQUE ASIGNACION color PIPE indice
+                        | COLOR_BLOQUE ASIGNACION color PIPE indice
+                        | FIGURA_BLOQUE ASIGNACION figura PIPE indice
+                        | LETRA_BLOQUE ASIGNACION letra PIPE indice
+                        | LETRA_SIZE_BLOQUE ASIGNACION NUMERO PIPE indice
+                        ; 
+
