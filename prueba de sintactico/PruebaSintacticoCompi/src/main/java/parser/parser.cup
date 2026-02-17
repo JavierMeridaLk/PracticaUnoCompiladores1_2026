@@ -23,7 +23,7 @@ parser code {:
     }
 
     public List<String> getSyntaxErrors(){
-        return this.syntaxErros;
+        return this.syntaxErrors;
     }
 
     /*** Manejo de los Errores Sintacticos ***/
@@ -48,10 +48,9 @@ parser code {:
 
     }
 
-    public void unrecovered_syntax_error(Symbol cur_tokne){
-        syntaxErros.add("Error que no se puede recuperar"); 
-
-    }
+    public void unrecovered_syntax_error(Symbol cur_token){
+    syntaxErrors.add("Error que no se puede recuperar");
+}
 
 :}
 
@@ -73,16 +72,28 @@ terminal String     VAR,INICIO,FIN, SI, ENTONCES, MIENTRAS, HACER, MOSTRAR, LEER
                     SEPARADOR, COMENTARIO, NUMERO, ASIGNACION, COMA, IDENTIFICADOR, TEXTO, PIPE
                     ;
 
+/*** Precedencia de los operadores ***/
+
+precedence left SUMA, RESTA;
+precedence left MULTIPLICACION, DIVISION;
+
 /*** No terminales -- Reglas definidas para la estructura sintactica ***/
 
-non terminal
-                    ;
+non terminal programa, operador_relacional, operador_logico, condicion, indice, signo_aritmetico, instruccion, configuracion, lista_confi, lista_instrucciones;
+
+non terminal String valor, texto, figura, letra, color;
+
+non terminal Double expresion;
 
 /*** Gramatica -- Reglas de validación ***/
 
-start with linea;
+start with programa;
 
-linea ::=               INICIO seudocodigo
+programa ::=            INICIO lista_instrucciones FIN SEPARADOR lista_confi
+                        ;
+lista_instrucciones ::= lista_instrucciones instruccion
+                        | instruccion
+                        ; 
                         ;
 valor ::=               IDENTIFICADOR
                         | NUMERO
@@ -99,10 +110,11 @@ operador_relacional ::= IGUALDAD
                         ;
 operador_logico ::=     AND
                         |OR
-                        |NOT
                         ;
-condicion ::=           PARENTESIS_IZQUIERDO valor operador_relacional valor PARENTESIS_DERECHO
-                        | PARENTESIS_IZQUIERDO valor operador_relacional valor operador_logico valor operador_relacional valor PARENTESIS_DERECHO
+condicion ::=           NOT condicion
+                        | PARENTESIS_IZQUIERDO condicion PARENTESIS_DERECHO
+                        | condicion operador_logico condicion
+                        | valor operador_relacional valor
                         ;
 indice ::=                 NUMERO
                         ;
@@ -113,31 +125,47 @@ figura ::=              ELIPSE
                         | ROMBO
                         | RECTANGULO_REDONDEADO
                         ;
-color :: =              COLOR_HEX
-                        | NUMERO COMA NUMERO COMA NUMERO
+expresion ::=           expresion:e1 SUMA expresion:e2                                          {: RESULT = e1 + e2; :}
+                        | expresion:e1 RESTA expresion:e2                                       {: RESULT = e1 - e2; :}
+                        | expresion:e1 MULTIPLICACION expresion:e2                              {: RESULT = e1 * e2; :}
+                        | expresion:e1 DIVISION expresion:e2                                    {: RESULT = e1 / e2; :}
+                        | PARENTESIS_IZQUIERDO expresion:e PARENTESIS_DERECHO                   {: RESULT = e; :}
+                        | NUMERO:n                                                              {: RESULT = Double.parseDouble(n); :}
                         ;
-tipo_letras ::=         ARIAL
+color ::=               COLOR_HEX
+                        | expresion:r COMA expresion:g COMA expresion:b
+                                                                                                {: int ri = (int)Math.floor(r);
+                                                                                                int gi = (int)Math.floor(g);
+                                                                                                int bi = (int)Math.floor(b);
+                                                                                                if(ri < 0 || ri > 255 ||
+                                                                                                gi < 0 || gi > 255 ||
+                                                                                                bi < 0 || bi > 255){
+                                                                                                    syntax_error(null);
+                                                                                                }else{
+                                                                                                    RESULT = ri + "," + gi + "," + bi;
+                                                                                                }
+                                                                                            :}
+                        ;
+letra ::=               ARIAL
                         | TIME_NEW_ROMAN
                         | COMIC_SANS
                         | VERDANA
                         ;
-signos_aritmeticos ::=  SUMA
+signo_aritmetico ::=  SUMA
                         | RESTA
                         | MULTIPLICACION
                         | DIVISION
                         | PARENTESIS_IZQUIERDO
                         | PARENTESIS_DERECHO
                         ;
-seudocodigo ::=         VAR IDENTIFICADOR ASIGNACION valor
-                        | SI condicion ENTONCES seudocodigo
-                        | MIENTRAS condicion HACER seudocodigo
+instruccion ::=         VAR IDENTIFICADOR ASIGNACION valor
+                        | SI condicion ENTONCES lista_instrucciones
+                        | MIENTRAS condicion HACER lista_instrucciones
                         | MOSTRAR texto
                         | LEER IDENTIFICADOR
                         | COMENTARIO
-                        | FIN configuracion
                         ;
-configuracion ::=       SEPARADOR configuracion
-                        | COMENTARIO configuracion
+configuracion ::=       COMENTARIO 
                         | DEFAULT ASIGNACION indice
                         | COLOR_TEXTO_SI ASIGNACION color PIPE indice
                         | COLOR_SI ASIGNACION color PIPE indice
@@ -154,5 +182,9 @@ configuracion ::=       SEPARADOR configuracion
                         | FIGURA_BLOQUE ASIGNACION figura PIPE indice
                         | LETRA_BLOQUE ASIGNACION letra PIPE indice
                         | LETRA_SIZE_BLOQUE ASIGNACION NUMERO PIPE indice
-                        ; 
+                        ;
+lista_confi ::=         lista_confi configuracion
+                        | configuracion
+                        ;
+
 
