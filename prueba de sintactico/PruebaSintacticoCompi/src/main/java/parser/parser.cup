@@ -1,6 +1,7 @@
 package parser;
 import java_cup.runtime.*;
 import java.util.*;
+import lexer.AnalizadorLexico;
 
 /********** Codigo cup **********/
 
@@ -11,8 +12,9 @@ parser code {:
 
     /*** Conexion de Parser y Lexer ***/
 
-    public parser(AnalizadorLexico lex){
+    public Parser(AnalizadorLexico lex){
         super(lex);
+        this.lex = lex; 
         syntaxErrors = new ArrayList<>();
     }
 
@@ -30,60 +32,92 @@ parser code {:
     
     public void syntax_error(Symbol cur_token) {
 
-        if(cur_token != null){
+        String lexema = "EOF";
+        int linea = -1;
+        int columna = -1;
 
-            String lexema = (cur_token.value != null)
-                    ? cur_token.value.toString()
-                    : sym.terminalNames[cur_token.sym];
+        if (cur_token != null) {
 
-            String error = "Error sintactico en linea "
-                    + cur_token.left +
-                    ", columna " +
-                    cur_token.right +
-                    ". Token inesperado: " +
-                    lexema;
+            linea = cur_token.left + 1;
+            columna = cur_token.right + 1;
 
-            syntaxErrors.add(error);
+            if (cur_token.value != null)
+                lexema = cur_token.value.toString();
+            else if (cur_token.sym >= 0 && cur_token.sym < sym.terminalNames.length)
+                lexema = sym.terminalNames[cur_token.sym];
         }
 
+        String mensaje = "Error sintáctico en línea "
+                + linea
+                + ", columna "
+                + columna
+                + ". Token inesperado: "
+                + lexema;
+
+        syntaxErrors.add(mensaje);
     }
 
-    public void unrecovered_syntax_error(Symbol cur_token){
-    syntaxErrors.add("Error que no se puede recuperar");
-}
+    public void unrecovered_syntax_error(Symbol cur_token) {
 
-:}
+        String lexema = "EOF";
+        int linea = -1;
+        int columna = -1;
+
+        if (cur_token != null) {
+
+            linea = cur_token.left + 1;
+            columna = cur_token.right + 1;
+
+            if (cur_token.value != null)
+                lexema = cur_token.value.toString();
+            else
+                lexema = sym.terminalNames[cur_token.sym];
+        }
+
+        syntaxErrors.add(
+            "Error sintáctico FATAL en línea "
+            + linea
+            + ", columna "
+            + columna
+            + ". Token: "
+            + lexema
+        );
+    }
+
+
+:};
 
 /********** Reglas sintacticas **********/
 
 /*** Terminales ***/
 
-terminal String     VAR,INICIO,FIN, SI, ENTONCES, MIENTRAS, HACER, MOSTRAR, LEER,
+terminal            VAR,INICIO,FIN, SI, ENTONCES, MIENTRAS, HACER, MOSTRAR, LEER, FINSI, FINMIENTRAS,
                     DEFAULT, COLOR_TEXTO_SI, COLOR_SI, FIGURA_SI, LETRA_SI, LETRA_SIZE_SI,
                     COLOR_TEXTO_MIENTRAS, COLOR_MIENTRAS, FIGURA_MIENTRAS, LETRA_MIENTRAS,
                     LETRA_SIZE_MIENTRAS, COLOR_TEXTO_BLOQUE, COLOR_BLOQUE, FIGURA_BLOQUE,
                     LETRA_BLOQUE, LETRA_SIZE_BLOQUE,
                     ELIPSE, CIRCULO, PARALELOGRAMO, RECTANGULO, ROMBO, RECTANGULO_REDONDEADO,
                     ARIAL, TIME_NEW_ROMAN, COMIC_SANS, VERDANA,
-                    COLOR_HEX,
                     IGUALDAD, DIFERENCIA, MAYOR_IGUAL, MENOR_IGUAL, MAYOR, MENOR,
                     AND, OR, NOT,
                     SUMA, RESTA, MULTIPLICACION, DIVISION, PARENTESIS_IZQUIERDO,PARENTESIS_DERECHO,
-                    SEPARADOR, COMENTARIO, NUMERO, ASIGNACION, COMA, IDENTIFICADOR, TEXTO, PIPE
+                    SEPARADOR, COMENTARIO, ASIGNACION, COMA, PIPE
                     ;
+terminal String IDENTIFICADOR, NUMERO, TEXTO, COLOR_HEX;
+
+/*** No terminales -- Reglas definidas para la estructura sintactica ***/
+
+non terminal String valor, texto, figura, letra, color, indice;
+
+non terminal Double expresion;
+
+non terminal        programa, operador_relacional, condicion, condicion_and, condicion_not, condicion_base, signo_aritmetico, instruccion, configuracion, 
+                    lista_confi, lista_instrucciones;
 
 /*** Precedencia de los operadores ***/
 
 precedence left SUMA, RESTA;
 precedence left MULTIPLICACION, DIVISION;
-
-/*** No terminales -- Reglas definidas para la estructura sintactica ***/
-
-non terminal programa, operador_relacional, operador_logico, condicion, indice, signo_aritmetico, instruccion, configuracion, lista_confi, lista_instrucciones;
-
-non terminal String valor, texto, figura, letra, color;
-
-non terminal Double expresion;
 
 /*** Gramatica -- Reglas de validación ***/
 
@@ -93,7 +127,10 @@ programa ::=            INICIO lista_instrucciones FIN SEPARADOR lista_confi
                         ;
 lista_instrucciones ::= lista_instrucciones instruccion
                         | instruccion
-                        ; 
+                        | lista_instrucciones error SEPARADOR
+                        {: 
+                            syntaxErrors.add("Error en instrucción. Se recuperó en ';'");
+                        :}
                         ;
 valor ::=               IDENTIFICADOR
                         | NUMERO
@@ -108,15 +145,19 @@ operador_relacional ::= IGUALDAD
                         | MAYOR
                         | MENOR
                         ;
-operador_logico ::=     AND
-                        |OR
+condicion ::=           condicion OR condicion_and
+                        | condicion_and
                         ;
-condicion ::=           NOT condicion
-                        | PARENTESIS_IZQUIERDO condicion PARENTESIS_DERECHO
-                        | condicion operador_logico condicion
+condicion_and ::=       condicion_and AND condicion_not
+                        | condicion_not
+                        ;
+condicion_not ::=       NOT condicion_not
+                        | condicion_base
+                        ;
+condicion_base ::=      PARENTESIS_IZQUIERDO condicion PARENTESIS_DERECHO
                         | valor operador_relacional valor
                         ;
-indice ::=                 NUMERO
+indice ::=              NUMERO
                         ;
 figura ::=              ELIPSE
                         | CIRCULO
@@ -140,18 +181,18 @@ color ::=               COLOR_HEX
                                                                                                 if(ri < 0 || ri > 255 ||
                                                                                                 gi < 0 || gi > 255 ||
                                                                                                 bi < 0 || bi > 255){
-                                                                                                    syntax_error(null);
+                                                                                                    
                                                                                                 }else{
                                                                                                     RESULT = ri + "," + gi + "," + bi;
                                                                                                 }
-                                                                                            :}
+                                                                                                :}
                         ;
 letra ::=               ARIAL
                         | TIME_NEW_ROMAN
                         | COMIC_SANS
                         | VERDANA
                         ;
-signo_aritmetico ::=  SUMA
+signo_aritmetico ::=    SUMA
                         | RESTA
                         | MULTIPLICACION
                         | DIVISION
@@ -159,11 +200,14 @@ signo_aritmetico ::=  SUMA
                         | PARENTESIS_DERECHO
                         ;
 instruccion ::=         VAR IDENTIFICADOR ASIGNACION valor
-                        | SI condicion ENTONCES lista_instrucciones
-                        | MIENTRAS condicion HACER lista_instrucciones
+                        | SI condicion ENTONCES lista_instrucciones FINSI
+                        | MIENTRAS condicion HACER lista_instrucciones FINMIENTRAS
                         | MOSTRAR texto
                         | LEER IDENTIFICADOR
                         | COMENTARIO
+                        | IDENTIFICADOR ASIGNACION IDENTIFICADOR signo_aritmetico NUMERO
+                        | IDENTIFICADOR ASIGNACION IDENTIFICADOR signo_aritmetico IDENTIFICADOR
+                        | IDENTIFICADOR ASIGNACION NUMERO signo_aritmetico NUMERO
                         ;
 configuracion ::=       COMENTARIO 
                         | DEFAULT ASIGNACION indice
@@ -185,6 +229,8 @@ configuracion ::=       COMENTARIO
                         ;
 lista_confi ::=         lista_confi configuracion
                         | configuracion
+                        | lista_confi error SEPARADOR
+                            {:
+                                syntaxErrors.add("Error en configuración. Se recuperó en ';'");
+                            :}
                         ;
-
-
