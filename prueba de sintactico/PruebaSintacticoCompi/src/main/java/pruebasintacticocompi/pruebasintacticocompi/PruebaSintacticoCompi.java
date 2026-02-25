@@ -23,123 +23,23 @@ public class PruebaSintacticoCompi {
 
         String texto = """
 
-        INICIO
-
-        VAR x = 10
-        VAR y = 20
-        VAR resultado = 0
-
-        MOSTRAR "Inicio del programa"
-        LEER x
-
-        resultado = x + 5
-        resultado = resultado * y
-        resultado = resultado / 2
-
-        SI (x < y) ENTONCES
-
-            MOSTRAR "x es menor que y"
-            resultado = resultado + 1
-
-        FINSI
-
-        MIENTRAS (resultado < 100) HACER
-
-            MOSTRAR "Dentro del ciclo"
-            resultado = resultado + 10
-
-        FINMIENTRAS
-
-        SI ((x < y) && !(resultado == 0)) ENTONCES
-
-            MOSTRAR "Condicion compleja verdadera"
-
-        FINSI
-
-        VAR = 50
-
-        MOSTRAR
-
-        SI (x < ) ENTONCES
-
-            MOSTRAR "Error en condicion"
-
-        FINSI
-
-        MIENTRAS resultado < 50 HACER
-
-            MOSTRAR "Error sintactico en mientras"
-
-        FINMIENTRAS
-
-        resultado = + 5
-
-        resultado = x *
-
-        VAR 123abc = 5
-
-        MOSTRAR "Texto sin cerrar
-
-        VAR z = 10 @ 5
-
-        VAR color = HFF12G5
-
-        VAR contador = 0
-
-        MIENTRAS (contador < 5) HACER
-
-            MOSTRAR "Contador"
-            contador = contador + 1
-
-        FINMIENTRAS
-
+       INICIO
+            VAR a = 10
+            VAR b = 20
+            SI (a < b) ENTONCES
+                MOSTRAR "a es menor que b"
+            FIN SI
+            MIENTRAS (a < 15) HACER
+                a = a + 1
+                MOSTRAR a
+            FIN MIENTRAS
+            MOSTRAR "Fin del programa"
         FIN
-
         %%%%
-
-        %DEFAULT = 1
-
-        %COLOR_TEXTO_SI = 255,0,0 | 1
-
-        %COLOR_SI = 0,255,0 | 1
-
-        %FIGURA_SI = ROMBO | 1
-
-        %LETRA_SI = ARIAL | 1
-
-        %LETRA_SIZE_SI = 12 | 1
-
-        %COLOR_TEXTO_MIENTRAS = HFF0000 | 2
-
-        %COLOR_MIENTRAS = 0,0,255 | 2
-
-        %FIGURA_MIENTRAS = RECTANGULO | 2
-
-        %LETRA_MIENTRAS = VERDANA | 2
-
-        %LETRA_SIZE_MIENTRAS = 14 | 2
-
-        %COLOR_SI = | 1
-
-        %FIGURA_SI = TRIANGULO | 1
-
-        %LETRA_SI = |
-
-        %LETRA_SIZE_SI = 12
-
-        %COLOR_TEXTO_SI = HZZZZZZ | 1
-
-        %COLOR_BLOQUE = 300,0,0 | 1
-
-        %LETRA_BLOQUE = HELVETICA | 1
-
-        %COLOR_TEXTO_BLOQUE = 10+5,20*2,30 | 3
-
-        %FIGURA_BLOQUE = RECTANGULO_REDONDEADO | 3
-
-        %LETRA_BLOQUE = COMIC_SANS | 3
-
-        %LETRA_SIZE_BLOQUE = 18 | 3
+        %DEFAULT=1
+        %COLOR_TEXTO_SI=12,45-5,1|1
+        %FIGURA_MIENTRAS=CIRCULO|1
+        %DEFAULT=3
 
         """;
      

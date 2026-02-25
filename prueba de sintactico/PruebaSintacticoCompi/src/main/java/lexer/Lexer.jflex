@@ -1,12 +1,11 @@
-package lexer;
-import java_cup.runtime.*;
-import java.util.*;
+package com.example.compiapp.logic;
+
 import java.util.ArrayList;
-import parser.sym;
+import java.util.List;
+import java_cup.runtime.Symbol;
 
-%% //Separador de area
+%% 
 
-//**********Declaraciones de JFlex**********
 %public
 %unicode
 %cup
@@ -17,28 +16,20 @@ import parser.sym;
 //*****Definicion de las expresiones regulares*****
 DIGITO = [0-9]
 LETRA = [a-zA-Z]
-IDENTIFICADOR = {LETRA}({LETRA}|{DIGITO})*
+IDENTIFICADOR = {LETRA}({LETRA}|{DIGITO}|_)*
 ESPACIOS = [ \n\r\t]+
 HEX_DIGIT = [0-9A-Fa-f]
 COLOR_HEX = H{HEX_DIGIT}{6}
 COMENTARIO = \#[^\r\n]*
 TEXTO = \"[^\"]*\"
 
-
-
-//*****Codigo*****
-
 %{
-
     private Symbol getToken(int type) {
-        
         return new Symbol(type, yyline + 1, yycolumn + 1);
     }
 
     private Symbol getToken(int type, Object value) {
-        
         return new Symbol(type, yyline + 1, yycolumn + 1, value);
-
     }
 
     private List<String> errors = new ArrayList<>();
@@ -47,32 +38,32 @@ TEXTO = \"[^\"]*\"
         return this.errors;
     }
 
-    private StringBuffer string = new StringBuffer();
-
     private void error(String message) {
         errors.add("Error en la linea: " + (yyline + 1) + ", columna: " + (yycolumn + 1) + " - " + message);
     }
 
+    private reporteBacken reporteBacken;
+	
+	public void setContadorBackend(reporteBacken reporteBacken) {
+		this.reporteBacken = reporteBacken;
+	}
 %}
 
-%% //Separador de area
-
-//**********Reglas lexicas**********
+%% 
 
 //*****Palabras reservadas*****
-
-//**SeudoCodigo**
+"FIN SI"                        { return getToken(sym.FINSI); }
+"FIN MIENTRAS"                  { return getToken(sym.FINMIENTRAS); }
 "VAR"                           { return getToken(sym.VAR); }
 "INICIO"                        { return getToken(sym.INICIO); }
 "FIN"                           { return getToken(sym.FIN); }
 "SI"                            { return getToken(sym.SI); }
-"FINSI"                         { return getToken(sym.FINSI); }
 "ENTONCES"                      { return getToken(sym.ENTONCES); }
 "MIENTRAS"                      { return getToken(sym.MIENTRAS); }
-"FINMIENTRAS"                   { return getToken(sym.FINMIENTRAS); }
 "HACER"                         { return getToken(sym.HACER); }
 "MOSTRAR"                       { return getToken(sym.MOSTRAR); }
 "LEER"                          { return getToken(sym.LEER); }
+
 
 //*****Configuración*****
 "%DEFAULT"                      { return getToken(sym.DEFAULT); }
@@ -98,7 +89,7 @@ TEXTO = \"[^\"]*\"
 "PARALELOGRAMO"                 { return getToken(sym.PARALELOGRAMO); }
 "RECTANGULO"                    { return getToken(sym.RECTANGULO); }
 "ROMBO"                         { return getToken(sym.ROMBO); }
-"RECTANGULO_REDONDEADO"        { return getToken(sym.RECTANGULO_REDONDEADO); }
+"RECTANGULO_REDONDEADO"         { return getToken(sym.RECTANGULO_REDONDEADO); }
 
 //*****Tipo de letras*****
 "ARIAL"                         { return getToken(sym.ARIAL); }
@@ -106,7 +97,7 @@ TEXTO = \"[^\"]*\"
 "COMIC_SANS"                    { return getToken(sym.COMIC_SANS); }
 "VERDANA"                       { return getToken(sym.VERDANA); }
 
-//*****Operadores relacionales*****
+//*****Operadores relacionales (Tus nombres)*****
 "=="                            { return getToken(sym.IGUALDAD); }
 "!="                            { return getToken(sym.DIFERENCIA); }
 ">="                            { return getToken(sym.MAYOR_IGUAL); }
@@ -119,42 +110,39 @@ TEXTO = \"[^\"]*\"
 "||"                            { return getToken(sym.OR); }
 "!"                             { return getToken(sym.NOT); }
 
-//*****Operadores Aritmeticos*****
-"+"                             { return getToken(sym.SUMA); }
-"-"                             { return getToken(sym.RESTA); }
-"*"                             { return getToken(sym.MULTIPLICACION); }
-"/"                             { return getToken(sym.DIVISION); }
+//*****Operadores Aritmeticos (Tus nombres)*****
+"+"                             { reporteBacken.agregarSuma(); return getToken(sym.SUMA); }
+"-"                             { reporteBacken.agregarResta(); return getToken(sym.RESTA); }
+"*"                             { reporteBacken.agregarMultiplicacion(); return getToken(sym.MULTIPLICACION); }
+"/"                             { reporteBacken.agregarDivision(); return getToken(sym.DIVISION); }
 "("                             { return getToken(sym.PARENTESIS_IZQUIERDO); }
 ")"                             { return getToken(sym.PARENTESIS_DERECHO); }
 
-//*****Separador*****
+//*****Separador y Signos*****
 "%%%%"                          { return getToken(sym.SEPARADOR); }
-
-//*****Colores HEX*****   
-{COLOR_HEX}                     { return getToken(sym.COLOR_HEX, yytext()); }
-
-//*****Texto***** 
-{TEXTO}                         { return getToken(sym.TEXTO, yytext()); }
-
-//*****Números*****
-{DIGITO}+(\.{DIGITO}+)?        { return getToken(sym.NUMERO, yytext()); }
-
-//*****Extras*****
 "|"                             { return getToken(sym.PIPE); }
 "="                             { return getToken(sym.ASIGNACION); }
 ","                             { return getToken(sym.COMA); }
 
+//*****Colores HEX***** {COLOR_HEX}                     { return getToken(sym.COLOR_HEX, yytext()); }
+
+//*****Texto***** 
+{TEXTO}                         { 
+                                    // Quitamos las comillas antes de mandarlo al Parser
+                                    String contenido = yytext().substring(1, yytext().length()-1);
+                                    return getToken(sym.TEXTO, contenido); 
+                                }
+
+//*****Números (Diferenciando Entero de Decimal)*****
+{DIGITO}+                       { return getToken(sym.ENTERO, Integer.parseInt(yytext())); }
+{DIGITO}+\.{DIGITO}+            { return getToken(sym.DECIMAL, Double.parseDouble(yytext())); }
+
 //*****Identificador*****
 {IDENTIFICADOR}                 { return getToken(sym.IDENTIFICADOR, yytext()); }
 
-//*****Comentarios*****
-{COMENTARIO}                    { return getToken(sym.COMENTARIO); }
+//*****Extras ignorados*****
+{COMENTARIO}                    { /* Ignorar */ }
+{ESPACIOS}                      { /* Ignorar */ }
 
-//*****Espacios*****
-{ESPACIOS}                      { }
-
-//*****Error*****
-.                               { error("lexema: <" + yytext() + ">"); }
-
-//*****EOF*****
+.                               { error("lexema no reconocido: <" + yytext() + ">"); }
 <<EOF>>                         { return getToken(sym.EOF); }

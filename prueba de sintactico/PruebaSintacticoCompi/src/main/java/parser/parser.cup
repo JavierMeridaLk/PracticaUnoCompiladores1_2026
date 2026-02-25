@@ -1,236 +1,145 @@
-package parser;
-import java_cup.runtime.*;
-import java.util.*;
-import lexer.AnalizadorLexico;
+package com.example.compiapp.logic;
 
-/********** Codigo cup **********/
+import java.util.ArrayList;
+import java.util.List;
+import java_cup.runtime.*;
 
 parser code {:
-
-    AnalizadorLexico lex;
-    private List<String> syntaxErrors;
-
-    /*** Conexion de Parser y Lexer ***/
-
-    public Parser(AnalizadorLexico lex){
-        super(lex);
-        this.lex = lex; 
-        syntaxErrors = new ArrayList<>();
-    }
-
-    /*** Getters ***/
-
-    public AnalizadorLexico getLexer(){
-        return this.lex;
-    }
+    private List<String> syntaxErrors = new ArrayList<>();
 
     public List<String> getSyntaxErrors(){
         return this.syntaxErrors;
     }
 
-    /*** Manejo de los Errores Sintacticos ***/
-    
     public void syntax_error(Symbol cur_token) {
-
-        String lexema = "EOF";
-        int linea = -1;
-        int columna = -1;
-
-        if (cur_token != null) {
-
-            linea = cur_token.left + 1;
-            columna = cur_token.right + 1;
-
-            if (cur_token.value != null)
-                lexema = cur_token.value.toString();
-            else if (cur_token.sym >= 0 && cur_token.sym < sym.terminalNames.length)
-                lexema = sym.terminalNames[cur_token.sym];
-        }
-
-        String mensaje = "Error sintáctico en línea "
-                + linea
-                + ", columna "
-                + columna
-                + ". Token inesperado: "
-                + lexema;
-
-        syntaxErrors.add(mensaje);
+        String lexema = (cur_token.value != null) ? cur_token.value.toString() : "EOF";
+        int linea = cur_token.left;
+        int columna = cur_token.right;
+        syntaxErrors.add("Error sintáctico en línea " + linea + ", columna " + columna + ". Token inesperado: " + lexema);
     }
-
-    public void unrecovered_syntax_error(Symbol cur_token) {
-
-        String lexema = "EOF";
-        int linea = -1;
-        int columna = -1;
-
-        if (cur_token != null) {
-
-            linea = cur_token.left + 1;
-            columna = cur_token.right + 1;
-
-            if (cur_token.value != null)
-                lexema = cur_token.value.toString();
-            else
-                lexema = sym.terminalNames[cur_token.sym];
-        }
-
-        syntaxErrors.add(
-            "Error sintáctico FATAL en línea "
-            + linea
-            + ", columna "
-            + columna
-            + ". Token: "
-            + lexema
-        );
-    }
-
-
 :};
 
-/********** Reglas sintacticas **********/
+/********** Terminales (Tus nombres del Lexer) **********/
 
-/*** Terminales ***/
+terminal VAR, INICIO, FIN, SI, ENTONCES, MIENTRAS, HACER, MOSTRAR, LEER;
+terminal FINSI, FINMIENTRAS; 
+terminal SEPARADOR, PIPE, ASIGNACION, COMA;
+terminal DEFAULT, COLOR_TEXTO_SI, COLOR_SI, FIGURA_SI, LETRA_SI, LETRA_SIZE_SI;
+terminal COLOR_TEXTO_MIENTRAS, COLOR_MIENTRAS, FIGURA_MIENTRAS, LETRA_MIENTRAS, LETRA_SIZE_MIENTRAS;
+terminal COLOR_TEXTO_BLOQUE, COLOR_BLOQUE, FIGURA_BLOQUE, LETRA_BLOQUE, LETRA_SIZE_BLOQUE;
+terminal ELIPSE, CIRCULO, PARALELOGRAMO, RECTANGULO, ROMBO, RECTANGULO_REDONDEADO;
+terminal ARIAL, TIME_NEW_ROMAN, COMIC_SANS, VERDANA;
+terminal PARENTESIS_IZQUIERDO, PARENTESIS_DERECHO;
+terminal SUMA, RESTA, MULTIPLICACION, DIVISION;
+terminal IGUALDAD, DIFERENCIA, MAYOR, MENOR, MAYOR_IGUAL, MENOR_IGUAL;
+terminal AND, OR, NOT;
 
-terminal            VAR,INICIO,FIN, SI, ENTONCES, MIENTRAS, HACER, MOSTRAR, LEER, FINSI, FINMIENTRAS,
-                    DEFAULT, COLOR_TEXTO_SI, COLOR_SI, FIGURA_SI, LETRA_SI, LETRA_SIZE_SI,
-                    COLOR_TEXTO_MIENTRAS, COLOR_MIENTRAS, FIGURA_MIENTRAS, LETRA_MIENTRAS,
-                    LETRA_SIZE_MIENTRAS, COLOR_TEXTO_BLOQUE, COLOR_BLOQUE, FIGURA_BLOQUE,
-                    LETRA_BLOQUE, LETRA_SIZE_BLOQUE,
-                    ELIPSE, CIRCULO, PARALELOGRAMO, RECTANGULO, ROMBO, RECTANGULO_REDONDEADO,
-                    ARIAL, TIME_NEW_ROMAN, COMIC_SANS, VERDANA,
-                    IGUALDAD, DIFERENCIA, MAYOR_IGUAL, MENOR_IGUAL, MAYOR, MENOR,
-                    AND, OR, NOT,
-                    SUMA, RESTA, MULTIPLICACION, DIVISION, PARENTESIS_IZQUIERDO,PARENTESIS_DERECHO,
-                    SEPARADOR, COMENTARIO, ASIGNACION, COMA, PIPE
-                    ;
-terminal String IDENTIFICADOR, NUMERO, TEXTO, COLOR_HEX;
+terminal String IDENTIFICADOR, TEXTO, COLOR_HEX;
+terminal Integer ENTERO;
+terminal Double DECIMAL;
 
-/*** No terminales -- Reglas definidas para la estructura sintactica ***/
+/********** No terminales **********/
 
-non terminal String valor, texto, figura, letra, color, indice;
+non terminal programa, bloque_codigo, lista_sentencias, sentencia;
+non terminal condicion, expresion, termino, factor;
+non terminal bloque_config, lista_config, instruccion_config;
+non terminal color, rgb, figura, letra;
 
-non terminal Double expresion;
+/********** Precedencia **********/
 
-non terminal        programa, operador_relacional, condicion, condicion_and, condicion_not, condicion_base, signo_aritmetico, instruccion, configuracion, 
-                    lista_confi, lista_instrucciones;
-
-/*** Precedencia de los operadores ***/
-
+precedence left OR;
+precedence left AND;
+precedence left IGUALDAD, DIFERENCIA;
+precedence left MENOR, MAYOR, MENOR_IGUAL, MAYOR_IGUAL;
 precedence left SUMA, RESTA;
 precedence left MULTIPLICACION, DIVISION;
+precedence right NOT;
 
-/*** Gramatica -- Reglas de validación ***/
+/********** Reglas gramaticales **********/
 
 start with programa;
 
-programa ::=            INICIO lista_instrucciones FIN SEPARADOR lista_confi
+programa ::=            bloque_codigo
+                        | bloque_codigo SEPARADOR bloque_config
                         ;
-lista_instrucciones ::= lista_instrucciones instruccion
-                        | instruccion
-                        | lista_instrucciones error SEPARADOR
-                        {: 
-                            syntaxErrors.add("Error en instrucción. Se recuperó en ';'");
-                        :}
+
+bloque_codigo ::=       INICIO lista_sentencias FIN
                         ;
-valor ::=               IDENTIFICADOR
-                        | NUMERO
+
+lista_sentencias ::=    lista_sentencias sentencia
+                        | sentencia
+                        | error sentencia 
+                        {: /* Al encontrar un error, intenta seguir con la siguiente sentencia */ :}
+                        | lista_sentencias error
                         ;
-texto ::=               TEXTO
-                        |IDENTIFICADOR
-                        ;
-operador_relacional ::= IGUALDAD
-                        | DIFERENCIA
-                        | MAYOR_IGUAL
-                        | MENOR_IGUAL
-                        | MAYOR
-                        | MENOR
-                        ;
-condicion ::=           condicion OR condicion_and
-                        | condicion_and
-                        ;
-condicion_and ::=       condicion_and AND condicion_not
-                        | condicion_not
-                        ;
-condicion_not ::=       NOT condicion_not
-                        | condicion_base
-                        ;
-condicion_base ::=      PARENTESIS_IZQUIERDO condicion PARENTESIS_DERECHO
-                        | valor operador_relacional valor
-                        ;
-indice ::=              NUMERO
-                        ;
-figura ::=              ELIPSE
-                        | CIRCULO
-                        | PARALELOGRAMO
-                        | RECTANGULO
-                        | ROMBO
-                        | RECTANGULO_REDONDEADO
-                        ;
-expresion ::=           expresion:e1 SUMA expresion:e2                                          {: RESULT = e1 + e2; :}
-                        | expresion:e1 RESTA expresion:e2                                       {: RESULT = e1 - e2; :}
-                        | expresion:e1 MULTIPLICACION expresion:e2                              {: RESULT = e1 * e2; :}
-                        | expresion:e1 DIVISION expresion:e2                                    {: RESULT = e1 / e2; :}
-                        | PARENTESIS_IZQUIERDO expresion:e PARENTESIS_DERECHO                   {: RESULT = e; :}
-                        | NUMERO:n                                                              {: RESULT = Double.parseDouble(n); :}
-                        ;
-color ::=               COLOR_HEX
-                        | expresion:r COMA expresion:g COMA expresion:b
-                                                                                                {: int ri = (int)Math.floor(r);
-                                                                                                int gi = (int)Math.floor(g);
-                                                                                                int bi = (int)Math.floor(b);
-                                                                                                if(ri < 0 || ri > 255 ||
-                                                                                                gi < 0 || gi > 255 ||
-                                                                                                bi < 0 || bi > 255){
-                                                                                                    
-                                                                                                }else{
-                                                                                                    RESULT = ri + "," + gi + "," + bi;
-                                                                                                }
-                                                                                                :}
-                        ;
-letra ::=               ARIAL
-                        | TIME_NEW_ROMAN
-                        | COMIC_SANS
-                        | VERDANA
-                        ;
-signo_aritmetico ::=    SUMA
-                        | RESTA
-                        | MULTIPLICACION
-                        | DIVISION
-                        | PARENTESIS_IZQUIERDO
-                        | PARENTESIS_DERECHO
-                        ;
-instruccion ::=         VAR IDENTIFICADOR ASIGNACION valor
-                        | SI condicion ENTONCES lista_instrucciones FINSI
-                        | MIENTRAS condicion HACER lista_instrucciones FINMIENTRAS
-                        | MOSTRAR texto
+
+sentencia ::=           VAR IDENTIFICADOR ASIGNACION expresion
+                        | IDENTIFICADOR ASIGNACION expresion
+                        | MOSTRAR TEXTO
+                        | MOSTRAR IDENTIFICADOR
                         | LEER IDENTIFICADOR
-                        | COMENTARIO
-                        | IDENTIFICADOR ASIGNACION IDENTIFICADOR signo_aritmetico NUMERO
-                        | IDENTIFICADOR ASIGNACION IDENTIFICADOR signo_aritmetico IDENTIFICADOR
-                        | IDENTIFICADOR ASIGNACION NUMERO signo_aritmetico NUMERO
+                        | SI PARENTESIS_IZQUIERDO condicion PARENTESIS_DERECHO ENTONCES lista_sentencias FINSI
+                        | MIENTRAS PARENTESIS_IZQUIERDO condicion PARENTESIS_DERECHO HACER lista_sentencias FINMIENTRAS
                         ;
-configuracion ::=       COMENTARIO 
-                        | DEFAULT ASIGNACION indice
-                        | COLOR_TEXTO_SI ASIGNACION color PIPE indice
-                        | COLOR_SI ASIGNACION color PIPE indice
-                        | FIGURA_SI ASIGNACION figura PIPE indice
-                        | LETRA_SI ASIGNACION letra PIPE indice
-                        | LETRA_SIZE_SI ASIGNACION NUMERO PIPE indice
-                        | COLOR_TEXTO_MIENTRAS ASIGNACION color PIPE indice
-                        | COLOR_MIENTRAS ASIGNACION color PIPE indice
-                        | FIGURA_MIENTRAS ASIGNACION figura PIPE indice
-                        | LETRA_MIENTRAS ASIGNACION letra PIPE indice
-                        | LETRA_SIZE_MIENTRAS ASIGNACION NUMERO PIPE indice
-                        | COLOR_TEXTO_BLOQUE ASIGNACION color PIPE indice
-                        | COLOR_BLOQUE ASIGNACION color PIPE indice
-                        | FIGURA_BLOQUE ASIGNACION figura PIPE indice
-                        | LETRA_BLOQUE ASIGNACION letra PIPE indice
-                        | LETRA_SIZE_BLOQUE ASIGNACION NUMERO PIPE indice
+
+condicion ::=           expresion IGUALDAD expresion
+                        | expresion DIFERENCIA expresion
+                        | expresion MENOR expresion
+                        | expresion MAYOR expresion
+                        | expresion MENOR_IGUAL expresion
+                        | expresion MAYOR_IGUAL expresion
+                        | condicion AND condicion
+                        | condicion OR condicion
+                        | NOT condicion
+                        | PARENTESIS_IZQUIERDO condicion PARENTESIS_DERECHO
                         ;
-lista_confi ::=         lista_confi configuracion
-                        | configuracion
-                        | lista_confi error SEPARADOR
-                            {:
-                                syntaxErrors.add("Error en configuración. Se recuperó en ';'");
-                            :}
+
+expresion ::=           expresion SUMA termino
+                        | expresion RESTA termino
+                        | termino
                         ;
+
+termino ::=             termino MULTIPLICACION factor
+                        | termino DIVISION factor
+                        | factor
+                        ;
+
+factor ::=              ENTERO
+                        | DECIMAL
+                        | IDENTIFICADOR
+                        | PARENTESIS_IZQUIERDO expresion PARENTESIS_DERECHO
+                        ;
+
+bloque_config ::=       lista_config
+                        ;
+
+lista_config ::=        lista_config instruccion_config
+                        | instruccion_config
+                        | lista_config error
+                        ;
+
+instruccion_config ::=  DEFAULT ASIGNACION expresion
+                        | COLOR_TEXTO_SI ASIGNACION color PIPE expresion
+                        | COLOR_SI ASIGNACION color PIPE expresion
+                        | FIGURA_SI ASIGNACION figura PIPE expresion
+                        | LETRA_SI ASIGNACION letra PIPE expresion
+                        | LETRA_SIZE_SI ASIGNACION expresion PIPE expresion
+                        | COLOR_TEXTO_MIENTRAS ASIGNACION color PIPE expresion
+                        | COLOR_MIENTRAS ASIGNACION color PIPE expresion
+                        | FIGURA_MIENTRAS ASIGNACION figura PIPE expresion
+                        | LETRA_MIENTRAS ASIGNACION letra PIPE expresion
+                        | LETRA_SIZE_MIENTRAS ASIGNACION expresion PIPE expresion
+                        | COLOR_TEXTO_BLOQUE ASIGNACION color PIPE expresion
+                        | COLOR_BLOQUE ASIGNACION color PIPE expresion
+                        | FIGURA_BLOQUE ASIGNACION figura PIPE expresion
+                        | LETRA_BLOQUE ASIGNACION letra PIPE expresion
+                        | LETRA_SIZE_BLOQUE ASIGNACION expresion PIPE expresion
+                        ;
+
+color ::=               COLOR_HEX | rgb ;
+
+rgb ::=                 expresion COMA expresion COMA expresion ;
+
+figura ::=              ELIPSE | CIRCULO | PARALELOGRAMO | RECTANGULO | ROMBO | RECTANGULO_REDONDEADO ;
+
+letra ::=               ARIAL | TIME_NEW_ROMAN | COMIC_SANS | VERDANA ;
