@@ -18,9 +18,8 @@ DIGITO = [0-9]
 LETRA = [a-zA-Z]
 IDENTIFICADOR = {LETRA}({LETRA}|{DIGITO}|_)*
 ESPACIOS = [ \n\r\t]+
-HEX_DIGIT = [0-9A-Fa-f]
-COLOR_HEX = H{HEX_DIGIT}{6}
-COMENTARIO = \#[^\r\n]*
+COLOR_HEX = H[0-9A-Fa-f]{6}
+COMENTARIO = "#"[^\r\n]*
 TEXTO = \"[^\"]*\"
 
 %{
@@ -43,10 +42,10 @@ TEXTO = \"[^\"]*\"
     }
 
     private reporteBacken reporteBacken;
-	
-	public void setContadorBackend(reporteBacken reporteBacken) {
-		this.reporteBacken = reporteBacken;
-	}
+    
+    public void setContadorBackend(reporteBacken reporteBacken) {
+        this.reporteBacken = reporteBacken;
+    }
 %}
 
 %% 
@@ -63,7 +62,6 @@ TEXTO = \"[^\"]*\"
 "HACER"                         { return getToken(sym.HACER); }
 "MOSTRAR"                       { return getToken(sym.MOSTRAR); }
 "LEER"                          { return getToken(sym.LEER); }
-
 
 //*****Configuración*****
 "%DEFAULT"                      { return getToken(sym.DEFAULT); }
@@ -97,7 +95,7 @@ TEXTO = \"[^\"]*\"
 "COMIC_SANS"                    { return getToken(sym.COMIC_SANS); }
 "VERDANA"                       { return getToken(sym.VERDANA); }
 
-//*****Operadores relacionales (Tus nombres)*****
+//*****Operadores relacionales*****
 "=="                            { return getToken(sym.IGUALDAD); }
 "!="                            { return getToken(sym.DIFERENCIA); }
 ">="                            { return getToken(sym.MAYOR_IGUAL); }
@@ -110,34 +108,30 @@ TEXTO = \"[^\"]*\"
 "||"                            { return getToken(sym.OR); }
 "!"                             { return getToken(sym.NOT); }
 
-//*****Operadores Aritmeticos (Tus nombres)*****
-"+"                             { reporteBacken.agregarSuma(); return getToken(sym.SUMA); }
-"-"                             { reporteBacken.agregarResta(); return getToken(sym.RESTA); }
-"*"                             { reporteBacken.agregarMultiplicacion(); return getToken(sym.MULTIPLICACION); }
-"/"                             { reporteBacken.agregarDivision(); return getToken(sym.DIVISION); }
+//*****Operadores Aritmeticos*****
+"+"                             { if(reporteBacken!=null) reporteBacken.agregarSuma(); return getToken(sym.SUMA); }
+"-"                             { if(reporteBacken!=null) reporteBacken.agregarResta(); return getToken(sym.RESTA); }
+"*"                             { if(reporteBacken!=null) reporteBacken.agregarMultiplicacion(); return getToken(sym.MULTIPLICACION); }
+"/"                             { if(reporteBacken!=null) reporteBacken.agregarDivision(); return getToken(sym.DIVISION); }
 "("                             { return getToken(sym.PARENTESIS_IZQUIERDO); }
 ")"                             { return getToken(sym.PARENTESIS_DERECHO); }
 
 //*****Separador y Signos*****
-"%%%%"                          { return getToken(sym.SEPARADOR); }
+"%%%%"                           { return getToken(sym.SEPARADOR); }
 "|"                             { return getToken(sym.PIPE); }
 "="                             { return getToken(sym.ASIGNACION); }
 ","                             { return getToken(sym.COMA); }
 
-//*****Colores HEX***** {COLOR_HEX}                     { return getToken(sym.COLOR_HEX, yytext()); }
-
-//*****Texto***** 
+//*****Valores*****
+{COLOR_HEX}                     { return getToken(sym.COLOR_HEX, yytext()); }
 {TEXTO}                         { 
-                                    // Quitamos las comillas antes de mandarlo al Parser
                                     String contenido = yytext().substring(1, yytext().length()-1);
                                     return getToken(sym.TEXTO, contenido); 
                                 }
 
-//*****Números (Diferenciando Entero de Decimal)*****
-{DIGITO}+                       { return getToken(sym.ENTERO, Integer.parseInt(yytext())); }
 {DIGITO}+\.{DIGITO}+            { return getToken(sym.DECIMAL, Double.parseDouble(yytext())); }
+{DIGITO}+                       { return getToken(sym.ENTERO, Integer.parseInt(yytext())); }
 
-//*****Identificador*****
 {IDENTIFICADOR}                 { return getToken(sym.IDENTIFICADOR, yytext()); }
 
 //*****Extras ignorados*****

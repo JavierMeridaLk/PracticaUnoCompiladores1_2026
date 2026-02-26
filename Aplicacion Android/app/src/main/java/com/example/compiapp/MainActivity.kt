@@ -10,18 +10,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.compiapp.ui.theme.CompiAppTheme
 import com.example.compiapp.ui.theme.viewModel.MainViewModel
 import androidx.activity.viewModels
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.TextField
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Button
@@ -29,16 +24,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.UploadFile
-import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.*
 import androidx.activity.result.contract.ActivityResultContracts
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.ui.platform.LocalContext
 import android.content.Intent
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.viewinterop.AndroidView
+import com.example.compiapp.ui.theme.viewModel.DiagramaCanvas
 
 
 class MainActivity : ComponentActivity() {
@@ -69,8 +64,9 @@ fun Greeting(
 
     val text by viewModel.text.collectAsState()
     val result by viewModel.result.collectAsState()
+    val nodos by viewModel.nodos.collectAsState()
     val context = LocalContext.current
-    // Launcher para abrir archivo
+    //para poder cargar archivos
     val filePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
@@ -86,6 +82,7 @@ fun Greeting(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState()) //
             .padding(24.dp),
         verticalArrangement = Arrangement.Top
     ) {
@@ -150,6 +147,27 @@ fun Greeting(
                     modifier = Modifier.padding(16.dp)
                 )
             }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (nodos.isNotEmpty()) {
+            Text("Diagrama Generado:", style = MaterialTheme.typography.titleMedium)
+
+            //puente a canvas
+            AndroidView(
+                factory = { ctx ->
+                    //vuista general
+                    DiagramaCanvas(ctx).apply {
+                    }
+                },
+                update = { view ->
+                    // update cada que cambie un nodo
+                    view.actualizarDiagrama(nodos)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1000.dp)
+            )
         }
     }
 }

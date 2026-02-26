@@ -943,12 +943,12 @@ public class AnalizadorLexico implements java_cup.runtime.Scanner {
           // fall through
           case 67: break;
           case 6:
-            { return getToken(sym.MULTIPLICACION); reporteBacken.agregarMultiplicacion();
+            { reporteBacken.agregarMultiplicacion(); return getToken(sym.MULTIPLICACION);
             }
           // fall through
           case 68: break;
           case 7:
-            { return getToken(sym.SUMA); reporteBacken.agregarSuma();
+            { reporteBacken.agregarSuma(); return getToken(sym.SUMA);
             }
           // fall through
           case 69: break;
@@ -958,12 +958,12 @@ public class AnalizadorLexico implements java_cup.runtime.Scanner {
           // fall through
           case 70: break;
           case 9:
-            { return getToken(sym.RESTA); reporteBacken.agregarResta();
+            { reporteBacken.agregarResta(); return getToken(sym.RESTA);
             }
           // fall through
           case 71: break;
           case 10:
-            { return getToken(sym.DIVISION); reporteBacken.agregarDivision();
+            { reporteBacken.agregarDivision(); return getToken(sym.DIVISION);
             }
           // fall through
           case 72: break;

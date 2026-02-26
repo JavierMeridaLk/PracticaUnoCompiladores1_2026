@@ -1,70 +1,64 @@
 package com.example.compiapp.logic
 
-import com.example.compiapp.logic.AnalizadorLexico
-import com.example.compiapp.logic.Parser
 import java.io.StringReader
 
 class Analizador {
 
-    fun analizar(text: String): String{
-
-        val stringBuilder = StringBuilder()
+    fun analizar(text: String, onNodosGenerados: (List<NodoDelDiagrama>) -> Unit): String {
         val reporteBacken = reporteBacken()
         val lexer = AnalizadorLexico(StringReader(text))
         lexer.setContadorBackend(reporteBacken)
         val parser = Parser(lexer)
 
-
         return try {
-
             parser.parse()
-
-            val erroresLexicos = lexer.erroresLexicos  // solo funciona si Kotlin reconoce el getter
+            val erroresLexicos = lexer.erroresLexicos
             val erroresSintacticos = parser.syntaxErrors
 
-            stringBuilder.append(
-                getErrors("ERRORES LEXICOS", erroresLexicos)
-            )
-
-            stringBuilder.append(
-                getErrors("ERRORES SINTACTICOS", erroresSintacticos)
-            )
-
-            stringBuilder.append(
-                getReporteOperadores(reporteBacken)
-            )
-
             if (erroresLexicos.isEmpty() && erroresSintacticos.isEmpty()) {
-                "No hay errores"
+                val programa = Programa()
+                programa.separarBloques(text)
+
+                val generador = GeneradorDeDiagrama()
+                val listaNodos = generador.generarNodos(programa.sentencias)
+                generador.aplicarConfiguracion(listaNodos, programa.configuracion)
+
+                onNodosGenerados(listaNodos)
+
+                buildString {
+                    appendLine("No hay errores.")
+                    appendLine()
+                    append(getReporteOperadores(reporteBacken))
+                }
             } else {
-                stringBuilder.toString()
+
+                onNodosGenerados(emptyList())
+                buildString {
+                    append(getErrors("ERRORES LEXICOS", erroresLexicos))
+                    append(getErrors("ERRORES SINTACTICOS", erroresSintacticos))
+                }
             }
-
         } catch (e: Exception) {
-            e.printStackTrace()
-            "Error real: ${e.message}"
+            onNodosGenerados(emptyList())
+            "❌ Error real: ${e.message}"
         }
-
     }
 
     private fun getErrors(
         title: String,
         errorsList: List<String>
     ): String {
-        val builder = StringBuilder()
-        builder.append(title)
-        builder.append("\n")
-        builder.append("---------------------------------------\n")
+        if (errorsList.isEmpty()) return "$title\n No hay errores detectados.\n"
 
-        if (errorsList.isEmpty()) {
-            builder.append("No hay errores\n\n")
-        } else {
-            for (error in errorsList) {
-                builder.append(error)
-                builder.append("\n")
+        return buildString {
+            append("❌ $title\n")
+            append("═".repeat(30) + "\n")
+            errorsList.forEachIndexed { index, error ->
+                append("${index + 1}. $error\n")
             }
+            append("═".repeat(30) + "\n")
+            append("Total de errores: ${errorsList.size}.")
         }
-        return builder.toString()
     }
     fun getReporteOperadores(backend: reporteBacken): String {
         return buildString {
@@ -76,4 +70,5 @@ class Analizador {
             appendLine("=================================")
         }
     }
+
 }
