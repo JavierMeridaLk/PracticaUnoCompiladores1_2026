@@ -8,6 +8,7 @@ class Analizador {
         val reporteBacken = reporteBacken()
         val lexer = AnalizadorLexico(StringReader(text))
         lexer.setContadorBackend(reporteBacken)
+
         val parser = Parser(lexer)
 
         return try {
@@ -28,7 +29,7 @@ class Analizador {
                 buildString {
                     appendLine("No hay errores.")
                     appendLine()
-                    append(getReporteOperadores(reporteBacken))
+                    append(obtenerReporte(reporteBacken))
                 }
             } else {
 
@@ -60,14 +61,28 @@ class Analizador {
             append("Total de errores: ${errorsList.size}.")
         }
     }
-    fun getReporteOperadores(backend: reporteBacken): String {
+    fun obtenerReporte(backend: reporteBacken): String {
         return buildString {
-            appendLine("===== REPORTE DE OPERADORES =====")
-            appendLine("Sumas: ${backend.sumas}")
-            appendLine("Restas: ${backend.restas}")
-            appendLine("Multiplicaciones: ${backend.multiplicacion}")
-            appendLine("Divisiones: ${backend.divisiones}")
-            appendLine("=================================")
+            appendLine(" --- REPORTES ---")
+
+            appendLine("\n OPERADORES MATEMÁTICOS")
+            appendLine("------------------------------------------")
+            if (backend.operadores.isEmpty()) {
+                appendLine("  (No se encontraron operadores)")
+            } else {
+                backend.operadores.forEach { appendLine(it) }
+            }
+            appendLine("------------------------------------------")
+
+            // --- ESTRUCTURAS ---
+            appendLine("\n ESTRUCTURAS DE CONTROL")
+            appendLine("------------------------------------------")
+            if (backend.estructuras.isEmpty()) {
+                appendLine("  (No se encontraron estructuras)")
+            } else {
+                backend.estructuras.forEach { appendLine(it) }
+            }
+            appendLine("------------------------------------------")
         }
     }
 

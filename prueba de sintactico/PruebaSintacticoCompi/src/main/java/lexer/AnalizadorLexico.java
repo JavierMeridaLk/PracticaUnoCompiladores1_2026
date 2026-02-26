@@ -497,6 +497,16 @@ public class AnalizadorLexico implements java_cup.runtime.Scanner {
         this.reporteBacken = reporteBacken;
     }
 
+    private void registrar(String lista, String tipo, String lexema) {
+        if (reporteBacken != null) {
+            if (lista.equals("OP")) {
+                reporteBacken.agregarOperador(tipo, yyline + 1, yycolumn + 1, lexema);
+            } else {
+                reporteBacken.agregarEstructura(tipo, yyline + 1, yycolumn + 1, lexema);
+            }
+        }
+    }
+
 
   /**
    * Creates a new scanner
@@ -949,12 +959,12 @@ public class AnalizadorLexico implements java_cup.runtime.Scanner {
           // fall through
           case 68: break;
           case 6:
-            { if(reporteBacken!=null) reporteBacken.agregarMultiplicacion(); return getToken(sym.MULTIPLICACION);
+            { registrar("OP", "MULTIPLICACION", yytext()); return getToken(sym.MULTIPLICACION);
             }
           // fall through
           case 69: break;
           case 7:
-            { if(reporteBacken!=null) reporteBacken.agregarSuma(); return getToken(sym.SUMA);
+            { registrar("OP", "SUMA", yytext()); return getToken(sym.SUMA);
             }
           // fall through
           case 70: break;
@@ -964,12 +974,12 @@ public class AnalizadorLexico implements java_cup.runtime.Scanner {
           // fall through
           case 71: break;
           case 9:
-            { if(reporteBacken!=null) reporteBacken.agregarResta(); return getToken(sym.RESTA);
+            { registrar("OP", "RESTA", yytext()); return getToken(sym.RESTA);
             }
           // fall through
           case 72: break;
           case 10:
-            { if(reporteBacken!=null) reporteBacken.agregarDivision(); return getToken(sym.DIVISION);
+            { registrar("OP", "DIVISION", yytext()); return getToken(sym.DIVISION);
             }
           // fall through
           case 73: break;
@@ -1035,7 +1045,7 @@ public class AnalizadorLexico implements java_cup.runtime.Scanner {
           // fall through
           case 85: break;
           case 23:
-            { return getToken(sym.SI);
+            { registrar("ES", "SI", yytext()); return getToken(sym.SI);
             }
           // fall through
           case 86: break;
@@ -1090,7 +1100,7 @@ public class AnalizadorLexico implements java_cup.runtime.Scanner {
           // fall through
           case 96: break;
           case 34:
-            { return getToken(sym.FINSI);
+            { registrar("ES", "FIN SI", yytext()); return getToken(sym.FINSI);
             }
           // fall through
           case 97: break;
@@ -1130,7 +1140,7 @@ public class AnalizadorLexico implements java_cup.runtime.Scanner {
           // fall through
           case 104: break;
           case 42:
-            { return getToken(sym.MIENTRAS);
+            { registrar("ES", "MIENTRAS", yytext()); return getToken(sym.MIENTRAS);
             }
           // fall through
           case 105: break;
@@ -1160,7 +1170,7 @@ public class AnalizadorLexico implements java_cup.runtime.Scanner {
           // fall through
           case 110: break;
           case 48:
-            { return getToken(sym.FINMIENTRAS);
+            { registrar("ES", "FIN MIENTRAS", yytext()); return getToken(sym.FINMIENTRAS);
             }
           // fall through
           case 111: break;

@@ -46,20 +46,32 @@ TEXTO = \"[^\"]*\"
     public void setContadorBackend(reporteBacken reporteBacken) {
         this.reporteBacken = reporteBacken;
     }
+
+    private void registrar(String lista, String tipo, String lexema) {
+        if (reporteBacken != null) {
+            if (lista.equals("OP")) {
+                reporteBacken.agregarOperador(tipo, yyline + 1, yycolumn + 1, lexema);
+            } else {
+                reporteBacken.agregarEstructura(tipo, yyline + 1, yycolumn + 1, lexema);
+            }
+        }
+    }
 %}
 
 %% 
 
+
+
 //*****Palabras reservadas*****
-"FIN SI"                        { return getToken(sym.FINSI); }
-"FIN MIENTRAS"                  { return getToken(sym.FINMIENTRAS); }
+"FIN SI"                        { registrar("ES", "FIN SI", yytext()); return getToken(sym.FINSI); }
+"FIN MIENTRAS"                  { registrar("ES", "FIN MIENTRAS", yytext()); return getToken(sym.FINMIENTRAS); }
+"SI"                            { registrar("ES", "SI", yytext()); return getToken(sym.SI); }
+"MIENTRAS"                      { registrar("ES", "MIENTRAS", yytext()); return getToken(sym.MIENTRAS); }
+"ENTONCES"                      { return getToken(sym.ENTONCES); }
+"HACER"                         { return getToken(sym.HACER); }
 "VAR"                           { return getToken(sym.VAR); }
 "INICIO"                        { return getToken(sym.INICIO); }
 "FIN"                           { return getToken(sym.FIN); }
-"SI"                            { return getToken(sym.SI); }
-"ENTONCES"                      { return getToken(sym.ENTONCES); }
-"MIENTRAS"                      { return getToken(sym.MIENTRAS); }
-"HACER"                         { return getToken(sym.HACER); }
 "MOSTRAR"                       { return getToken(sym.MOSTRAR); }
 "LEER"                          { return getToken(sym.LEER); }
 
@@ -109,10 +121,10 @@ TEXTO = \"[^\"]*\"
 "!"                             { return getToken(sym.NOT); }
 
 //*****Operadores Aritmeticos*****
-"+"                             { if(reporteBacken!=null) reporteBacken.agregarSuma(); return getToken(sym.SUMA); }
-"-"                             { if(reporteBacken!=null) reporteBacken.agregarResta(); return getToken(sym.RESTA); }
-"*"                             { if(reporteBacken!=null) reporteBacken.agregarMultiplicacion(); return getToken(sym.MULTIPLICACION); }
-"/"                             { if(reporteBacken!=null) reporteBacken.agregarDivision(); return getToken(sym.DIVISION); }
+"+"                             { registrar("OP", "SUMA", yytext()); return getToken(sym.SUMA); }
+"-"                             { registrar("OP", "RESTA", yytext()); return getToken(sym.RESTA); }
+"*"                             { registrar("OP", "MULTIPLICACION", yytext()); return getToken(sym.MULTIPLICACION); }
+"/"                             { registrar("OP", "DIVISION", yytext()); return getToken(sym.DIVISION); }
 "("                             { return getToken(sym.PARENTESIS_IZQUIERDO); }
 ")"                             { return getToken(sym.PARENTESIS_DERECHO); }
 

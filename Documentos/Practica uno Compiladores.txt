@@ -1,0 +1,108 @@
+Practica uno Compiladores 1 2026
+
+El lenguaje acepta. 
+
+Palabras reservadas:
+	
+	-SeudoCodigo:
+		-VAR 				Asignación a variables
+		-INICIO				Inicio del diagrama
+		-FIN				Fin del diagrama 
+		-SI (condición)	ENTONCES	Representa una condición
+		-MIENTRAS (condición) HACER	Representa un ciclo
+		-MOSTRAR "texto"		Muestra texto
+		-LEER				Lectura de una variable
+	-Configuración:
+		-%DEFAULT= <indice> 						Aplica estilo y formato por defecto al objeto del indice
+		-%COLOR_TEXTO_SI= <rgb> o <hexadecimal> | <indice>		Aplica color al texto de la figura condicional
+		-%COLOR_SI= <rgb> o <hexadecimal> | <indice>			Aplica el color al fondo de la figura condicional.
+		-%FIGURA_SI= <NOMBRE_FIGURA> | <indice>				Aplica la figura seleccionada la figura que representa el condicional
+		-%LETRA_SI= <NOMBRE_LETRA> | <indice>				Aplica la letra seleccionada al texto de la figura condicional
+		-%LETRA_SIZE_SI= <expresión decimal> | <indice>			Aplica el tamaño de la letra al texto de la figura condicional
+		-%COLOR_TEXTO_MIENTRAS= <rgb> o <hexadecimal> | <indice>	Aplica color al texto de la figura MIENTRAS
+		-%COLOR_MIENTRAS = <rgb> o <hexadecimal> | <indice>		Aplica el color al fondo de la figura MIENTRAS.
+		-%FIGURA_MIENTRAS= <NOMBRE_FIGURA> | <indice> 			Aplica la figura seleccionada la figura que representa el MIENTRAS
+		-%LETRA_MIENTRAS= <NOMBRE_LETRA> | <indice> 			Aplica la letra seleccionada al texto de la figura MIENTRAS
+		-%LETRA_SIZE_MIENTRAS= <expresión decimal> | <indice>		Aplica el tamaño de la letra al texto de la figura MIENTRAS
+		-%COLOR_TEXTO_BLOQUE= <rgb> o <hexadecimal> | <indice>		Aplica color al texto de la figura BLOQUE
+		-%COLOR_BLOQUE = <rgb> o <hexadecimal> | <indice>		Aplica el color al fondo de la figura BLOQUE.
+		-%FIGURA_BLOQUE= <NOMBRE_FIGURA> | <indice> 			Aplica la figura seleccionada la figura que representa el BLOQUE
+		-%LETRA_BLOQUE= <NOMBRE_LETRA> | <indice> 			Aplica la letra seleccionada al texto de la figura BLOQUE
+		-%LETRA_SIZE_BLOQUE= <expresión decimal> | <indice>		Aplica el tamaño de la letra al texto de la figura BLOQUE
+	-Figuras:
+		-ELIPSE
+		-CIRCULO
+		-PARALELOGRAMO
+		-RECTANGULO
+		-ROMBO
+		-RECTANGULO_REDONDEADO
+	-Tipos de letras:
+		-ARIAL
+		-TIME_NEW_ROMAN
+		-COMIC_SANS
+		-VERDANA
+		
+Expresión de colores:
+
+	-rgb: Tres expresiones ENTERAS, separadas por ","
+	      Pueden tener operaciones aritméticas en los parámetros del color, si es decimal, se utiliza el entero y se omite el decimal.
+	      ejemplo:
+	      	12,75,25+6-8
+	      	1,2,3
+	-hexadecimal: Esta representado por H seguido de 6 dígitos hexadecimales
+	      ejemplo
+	     	HFF0012A
+	     	
+Operadores relacionales:
+	
+	- ==	Igualdad
+	- !=	Diferente
+	- >	Mayor que
+	- <	Menor que
+	- >=	Mayor o igual que
+	- <= 	Menor o igual que
+	
+Operadores lógicos:
+	
+	- &&	And
+	- ||	Or
+	- !	Not
+
+Signos aritméticos:
+
+	Símbolo 	Descripción 	Precedencia
+	+ 		Suma 		1
+	-		Resta		1
+	*		Multiplicación	2
+	/		División 	2
+	()		Paréntesis	3
+
+Números:
+	
+	Acepta números enteros, decimales u operaciones lineales entre enteros y decimales.
+	[0-9]*.?[0-9]*
+	Ejemplos:
+		85
+		12-85
+		25-2*5/4
+
+Comentarios:
+
+	Comentarios de una linea, acepta todo el texto hasta el salto de linea
+	Empieza con "#"
+	
+Separador:
+
+	Token único que separa las dos partes del archivo de entrada
+	"%%%%"
+	
+Existen:
+
+Bloques de código:
+
+	Conjunto de instrucciones consecutivas
+	Unicamente se agrupan:
+	-VAR
+	-asignaciones de variables
+	-MOSTRAR 
+	-LEER
